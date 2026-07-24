@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Keyboard Cat | $KEYCAT</title>
+  <meta name="description" content="Keyboard Cat ($KEYCAT) — the legendary meme on Solana. Larp is the face behind Keycat." />
+  <link rel="icon" type="image/png" href="logo.png" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            stage: {
+              950: '#050b1a',
+              900: '#0a1628',
+              800: '#0f2140',
+              700: '#153056',
+              600: '#1e4a7a',
+            },
+            neon: {
+              blue: '#3b9eff',
+              cyan: '#22d3ee',
+              glow: '#60a5fa',
+              ice: '#a5f3fc',
+              hot: '#38bdf8',
+            },
+          },
+          fontFamily: {
+            display: ['Bangers', 'cursive'],
+            body: ['Nunito', 'system-ui', 'sans-serif'],
+          },
+          boxShadow: {
+            'neon': '0 0 20px rgba(59, 158, 255, 0.55), 0 0 40px rgba(34, 211, 238, 0.25)',
+            'neon-lg': '0 0 30px rgba(59, 158, 255, 0.7), 0 0 60px rgba(34, 211, 238, 0.35)',
+            'card': '0 10px 40px rgba(5, 11, 26, 0.6), inset 0 1px 0 rgba(255,255,255,0.08)',
+            'btn': '0 6px 0 #0c4a6e, 0 10px 24px rgba(14, 165, 233, 0.45)',
+            'btn-press': '0 2px 0 #0c4a6e, 0 4px 12px rgba(14, 165, 233, 0.35)',
+          },
+          animation: {
+            'float': 'float 4s ease-in-out infinite',
+            'pulse-glow': 'pulseGlow 2.4s ease-in-out infinite',
+            'marquee': 'marquee 22s linear infinite',
+            'bounce-soft': 'bounceSoft 2s ease-in-out infinite',
+            'wiggle': 'wiggle 1.2s ease-in-out infinite',
+            'spotlight': 'spotlight 8s ease-in-out infinite',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-12px)' },
+            },
+            pulseGlow: {
+              '0%, 100%': { boxShadow: '0 0 20px rgba(59,158,255,0.4)' },
+              '50%': { boxShadow: '0 0 40px rgba(34,211,238,0.7)' },
+            },
+            marquee: {
+              '0%': { transform: 'translateX(0)' },
+              '100%': { transform: 'translateX(-50%)' },
+            },
+            bounceSoft: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-6px)' },
+            },
+            wiggle: {
+              '0%, 100%': { transform: 'rotate(-3deg)' },
+              '50%': { transform: 'rotate(3deg)' },
+            },
+            spotlight: {
+              '0%, 100%': { opacity: '0.35' },
+              '50%': { opacity: '0.7' },
+            },
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    * {
+      cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Ctext y='24' font-size='24'%3E🐱%3C/text%3E%3C/svg%3E") 12 12, auto !important;
+    }
+
+    a, button, [role="button"], input, textarea, select, label, .copy-btn {
+      cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Ctext y='24' font-size='24'%3E🐱%3C/text%3E%3C/svg%3E") 12 12, pointer !important;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Nunito', system-ui, sans-serif;
+      background: #050b1a;
+      overflow-x: hidden;
+    }
+
+    .font-display {
+      font-family: 'Bangers', cursive;
+      letter-spacing: 0.04em;
+    }
+
+    /* Stage background */
+    .stage-bg {
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(56, 189, 248, 0.28), transparent 55%),
+        radial-gradient(ellipse 60% 40% at 20% 80%, rgba(37, 99, 235, 0.18), transparent 50%),
+        radial-gradient(ellipse 50% 35% at 85% 60%, rgba(14, 165, 233, 0.15), transparent 50%),
+        linear-gradient(180deg, #050b1a 0%, #0a1628 40%, #0f2140 100%);
+    }
+
+    .spotlight {
+      position: absolute;
+      width: 280px;
+      height: 420px;
+      background: linear-gradient(180deg, rgba(147, 197, 253, 0.22), transparent 70%);
+      clip-path: polygon(35% 0%, 65% 0%, 100% 100%, 0% 100%);
+      pointer-events: none;
+      filter: blur(2px);
+      animation: spotlight 8s ease-in-out infinite;
+    }
+
+    .cartoon-card {
+      background: linear-gradient(145deg, rgba(21, 48, 86, 0.85), rgba(10, 22, 40, 0.95));
+      border: 3px solid rgba(96, 165, 250, 0.45);
+      border-radius: 1.5rem;
+      box-shadow:
+        0 8px 0 rgba(12, 74, 110, 0.55),
+        0 16px 40px rgba(5, 11, 26, 0.55),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      position: relative;
+    }
+
+    .cartoon-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(135deg, rgba(255,255,255,0.08), transparent 40%);
+      pointer-events: none;
+    }
+
+    .cartoon-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      font-family: 'Bangers', cursive;
+      letter-spacing: 0.06em;
+      border-radius: 9999px;
+      border: 3px solid rgba(255, 255, 255, 0.25);
+      transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+      user-select: none;
+    }
+
+    .cartoon-btn:hover {
+      transform: translateY(-3px) scale(1.03);
+      filter: brightness(1.08);
+    }
+
+    .cartoon-btn:active {
+      transform: translateY(2px) scale(0.98);
+      box-shadow: 0 2px 0 #0c4a6e, 0 4px 12px rgba(14, 165, 233, 0.35) !important;
+    }
+
+    .btn-buy {
+      background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
+      color: #fff;
+      text-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
+      box-shadow: 0 6px 0 #0c4a6e, 0 10px 24px rgba(14, 165, 233, 0.45);
+    }
+
+    .btn-chart {
+      background: linear-gradient(180deg, #1e3a5f 0%, #0f2140 100%);
+      color: #7dd3fc;
+      box-shadow: 0 6px 0 #06101f, 0 10px 24px rgba(14, 165, 233, 0.2);
+    }
+
+    .btn-social {
+      width: 3.25rem;
+      height: 3.25rem;
+      border-radius: 9999px;
+      border: 3px solid rgba(96, 165, 250, 0.5);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      box-shadow: 0 4px 0 rgba(12, 74, 110, 0.5), 0 8px 20px rgba(14, 165, 233, 0.25);
+    }
+
+    .btn-social:hover {
+      transform: translateY(-3px) scale(1.08);
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.55);
+    }
+
+    .x-bg {
+      background: #020617;
+      border-color: rgba(226, 232, 240, 0.55) !important;
+      box-shadow:
+        0 4px 0 #000,
+        0 0 0 2px rgba(15, 23, 42, 0.9),
+        0 8px 20px rgba(0, 0, 0, 0.45) !important;
+    }
+
+    .x-bg:hover {
+      border-color: rgba(255, 255, 255, 0.85) !important;
+      box-shadow:
+        0 0 0 2px #020617,
+        0 0 22px rgba(255, 255, 255, 0.35),
+        0 8px 24px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    /* Force x.png to a solid white mark so it reads on dark */
+    .x-icon {
+      width: 1.55rem;
+      height: 1.55rem;
+      object-fit: contain;
+      filter: brightness(0) invert(1);
+      opacity: 1;
+      display: block;
+    }
+
+    .x-bg.w-16 .x-icon {
+      width: 2.15rem;
+      height: 2.15rem;
+    }
+
+    .tg-bg {
+      background: #0ea5e9;
+    }
+
+    .step-badge {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 9999px;
+      background: linear-gradient(180deg, #38bdf8, #0369a1);
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 4px 0 #0c4a6e, 0 0 20px rgba(56, 189, 248, 0.4);
+      font-family: 'Bangers', cursive;
+      font-size: 1.5rem;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .ca-box {
+      background: rgba(5, 11, 26, 0.75);
+      border: 2px dashed rgba(56, 189, 248, 0.55);
+      border-radius: 1rem;
+      backdrop-filter: blur(8px);
+    }
+
+    .marquee-track {
+      display: flex;
+      width: max-content;
+      animation: marquee 22s linear infinite;
+    }
+
+    .section-title {
+      font-family: 'Bangers', cursive;
+      letter-spacing: 0.05em;
+      background: linear-gradient(180deg, #e0f2fe 0%, #38bdf8 50%, #0284c7 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: none;
+      filter: drop-shadow(0 3px 0 rgba(12, 74, 110, 0.45));
+    }
+
+    .logo-ring {
+      box-shadow:
+        0 0 0 4px rgba(56, 189, 248, 0.45),
+        0 0 0 8px rgba(14, 165, 233, 0.15),
+        0 0 40px rgba(56, 189, 248, 0.5);
+    }
+
+    .banner-frame {
+      border: 4px solid rgba(96, 165, 250, 0.5);
+      border-radius: 1.5rem;
+      box-shadow:
+        0 10px 0 rgba(12, 74, 110, 0.4),
+        0 0 50px rgba(56, 189, 248, 0.3),
+        inset 0 0 40px rgba(14, 165, 233, 0.1);
+      overflow: hidden;
+    }
+
+    .paw {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      font-size: 1.35rem;
+      transition: transform 0.08s linear, opacity 0.15s ease;
+      will-change: transform, opacity;
+      filter: drop-shadow(0 0 4px rgba(56, 189, 248, 0.6));
+    }
+
+    .nav-glass {
+      background: rgba(5, 11, 26, 0.75);
+      backdrop-filter: blur(14px);
+      border-bottom: 2px solid rgba(56, 189, 248, 0.2);
+    }
+
+    .tokenomics-bar {
+      height: 0.85rem;
+      border-radius: 9999px;
+      background: linear-gradient(90deg, #38bdf8, #22d3ee, #60a5fa);
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.5);
+    }
+
+    .floating-note {
+      position: absolute;
+      font-size: 1.5rem;
+      opacity: 0.35;
+      animation: float 5s ease-in-out infinite;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    /* Music symbol rain — bottom → top */
+    .music-rain {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .music-drop {
+      position: absolute;
+      bottom: -10vh;
+      color: rgba(125, 211, 252, 0.55);
+      font-size: 1.25rem;
+      line-height: 1;
+      user-select: none;
+      will-change: transform, opacity;
+      animation-name: musicRainUp;
+      animation-timing-function: linear;
+      animation-iteration-count: infinite;
+      text-shadow:
+        0 0 8px rgba(56, 189, 248, 0.45),
+        0 0 16px rgba(34, 211, 238, 0.2);
+      filter: drop-shadow(0 0 4px rgba(56, 189, 248, 0.35));
+    }
+
+    @keyframes musicRainUp {
+      0% {
+        transform: translate3d(0, 0, 0) rotate(0deg) scale(var(--s, 1));
+        opacity: 0;
+      }
+      8% {
+        opacity: var(--o, 0.55);
+      }
+      85% {
+        opacity: var(--o, 0.55);
+      }
+      100% {
+        transform: translate3d(var(--drift, 0px), -115vh, 0) rotate(var(--rot, 360deg)) scale(var(--s, 1));
+        opacity: 0;
+      }
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(120%);
+      background: linear-gradient(180deg, #38bdf8, #0284c7);
+      color: white;
+      font-family: 'Bangers', cursive;
+      letter-spacing: 0.06em;
+      padding: 0.75rem 1.5rem;
+      border-radius: 9999px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 6px 0 #0c4a6e, 0 12px 30px rgba(14, 165, 233, 0.4);
+      z-index: 10000;
+      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      pointer-events: none;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .dex-frame {
+      border: 3px solid rgba(96, 165, 250, 0.4);
+      border-radius: 1.25rem;
+      overflow: hidden;
+      box-shadow: 0 8px 0 rgba(12, 74, 110, 0.35), 0 0 40px rgba(14, 165, 233, 0.2);
+      background: #0a1628;
+    }
+
+    .hero-glow-text {
+      text-shadow:
+        0 0 20px rgba(56, 189, 248, 0.6),
+        0 4px 0 rgba(12, 74, 110, 0.6);
+    }
+
+    @media (max-width: 640px) {
+      .spotlight { display: none; }
+    }
+  </style>
+</head>
+<body class="stage-bg text-sky-100 font-body antialiased">
+  <!-- Cat paw trail -->
+  <div id="paw1" class="paw" aria-hidden="true">🐾</div>
+  <div id="paw2" class="paw" aria-hidden="true">🐾</div>
+  <div id="paw3" class="paw" aria-hidden="true">🐾</div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast">CA COPIED! 🐱🎹</div>
+
+  <!-- Music symbol rain (bottom → top) -->
+  <div id="music-rain" class="music-rain" aria-hidden="true"></div>
+
+  <!-- NAV -->
+  <nav class="nav-glass fixed top-0 inset-x-0 z-50">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <a href="#top" class="flex items-center gap-3 group">
+        <img src="logo.png" alt="KEYCAT logo" class="w-11 h-11 rounded-full object-cover logo-ring group-hover:scale-105 transition-transform" />
+        <div class="leading-tight">
+          <div class="font-display text-2xl text-sky-100 hero-glow-text">Keyboard Cat</div>
+          <div class="text-xs font-extrabold text-sky-400 tracking-widest">$KEYCAT</div>
+        </div>
+      </a>
+
+      <div class="hidden md:flex items-center gap-6 text-sm font-extrabold text-sky-200">
+        <a href="#about" class="hover:text-cyan-300 transition-colors">About</a>
+        <a href="#how-to-buy" class="hover:text-cyan-300 transition-colors">How to Buy</a>
+        <a href="#chart" class="hover:text-cyan-300 transition-colors">Chart</a>
+        <a href="#community" class="hover:text-cyan-300 transition-colors">Community</a>
+      </div>
+
+      <div class="flex items-center gap-2 sm:gap-3">
+        <a href="https://t.me/KEYCATpump" target="_blank" rel="noopener noreferrer" class="btn-social tg-bg" title="Telegram">
+          <img src="tg.png" alt="Telegram" class="w-full h-full object-cover" />
+        </a>
+        <a href="https://x.com/KEYCATpump" target="_blank" rel="noopener noreferrer" class="btn-social x-bg" title="X / Twitter">
+          <img src="x.png" alt="X / Twitter" class="x-icon" />
+        </a>
+        <a
+          href="https://swap.pump.fun/?input=So11111111111111111111111111111111111111112&output=TBA"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="cartoon-btn btn-buy px-4 sm:px-5 py-2 text-lg sm:text-xl hidden sm:inline-flex"
+        >
+          Buy Now 🎹
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header id="top" class="relative pt-28 pb-10 sm:pt-32 sm:pb-16 overflow-hidden">
+    <!-- Spotlights -->
+    <div class="spotlight left-[8%] top-0 animate-spotlight" style="animation-delay:0s"></div>
+    <div class="spotlight left-[42%] top-0 animate-spotlight" style="animation-delay:2s"></div>
+    <div class="spotlight right-[8%] top-0 animate-spotlight" style="animation-delay:4s"></div>
+
+    <div class="max-w-6xl mx-auto px-4 relative z-10">
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border-2 border-sky-400/40 bg-sky-500/10 text-sky-300 text-xs sm:text-sm font-extrabold tracking-wider mb-5 animate-bounce-soft">
+          <span>🔴 LIVE ON STAGE</span>
+          <span class="text-sky-100">·</span>
+          <span>SOLANA MEME LEGEND</span>
+        </div>
+
+        <h1 class="font-display text-6xl sm:text-7xl md:text-8xl lg:text-9xl text-white hero-glow-text mb-3">
+          KEYBOARD CAT
+        </h1>
+        <p class="font-display text-3xl sm:text-4xl md:text-5xl text-cyan-300 mb-4">
+          $KEYCAT
+        </p>
+        <p class="max-w-2xl mx-auto text-sky-200/90 text-base sm:text-lg font-bold leading-relaxed">
+          The original internet superstar hits the Solana stage.
+          <span class="text-cyan-300">Hit the keys. Pump the vibe. Join the legend.</span>
+        </p>
+      </div>
+
+      <!-- Banner -->
+      <div class="banner-frame max-w-5xl mx-auto mb-8 animate-pulse-glow">
+        <img src="banner.png" alt="Keyboard Cat banner" class="w-full h-auto block" />
+      </div>
+
+      <!-- CA + CTAs -->
+      <div class="max-w-3xl mx-auto space-y-5">
+        <div class="ca-box p-3 sm:p-4 flex flex-col sm:flex-row items-center gap-3">
+          <div class="flex-1 min-w-0 text-center sm:text-left">
+            <div class="text-[10px] sm:text-xs font-extrabold text-sky-400 tracking-[0.2em] uppercase mb-1">Contract Address</div>
+            <code id="ca-text" class="text-sky-100 font-bold text-xs sm:text-sm break-all">TBA</code>
+          </div>
+          <button
+            id="copy-ca"
+            type="button"
+            class="cartoon-btn btn-buy copy-btn px-5 py-2.5 text-lg shrink-0 w-full sm:w-auto"
+          >
+            Copy CA 📋
+          </button>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+          <a
+            href="https://swap.pump.fun/?input=So11111111111111111111111111111111111111112&output=TBA"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="cartoon-btn btn-buy w-full sm:w-auto px-8 py-3.5 text-2xl sm:text-3xl"
+          >
+            🎹 Buy Now
+          </a>
+          <a
+            href="https://dexscreener.com/solana/TBA"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="cartoon-btn btn-chart w-full sm:w-auto px-8 py-3.5 text-2xl sm:text-3xl"
+          >
+            📊 Chart
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MARQUEE -->
+  <div class="border-y-2 border-sky-500/30 bg-stage-900/80 overflow-hidden py-3 relative z-10">
+    <div class="marquee-track">
+      <div class="flex items-center gap-8 px-4 font-display text-xl sm:text-2xl text-sky-300 whitespace-nowrap">
+        <span>🐱 KEYBOARD CAT</span>
+        <span>🎹 $KEYCAT</span>
+        <span>⚡ SOLANA</span>
+        <span>🎤 LARP ON STAGE</span>
+        <span>🚀 TO THE MOON</span>
+        <span>🐾 TRUE BELIEVER</span>
+        <span>🔥 KOL META</span>
+        <span>🎵 HIT THE KEYS</span>
+        <span>🐱 KEYBOARD CAT</span>
+        <span>🎹 $KEYCAT</span>
+        <span>⚡ SOLANA</span>
+        <span>🎤 LARP ON STAGE</span>
+        <span>🚀 TO THE MOON</span>
+        <span>🐾 TRUE BELIEVER</span>
+        <span>🔥 KOL META</span>
+        <span>🎵 HIT THE KEYS</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ABOUT / LORE -->
+  <section id="about" class="relative py-16 sm:py-24 z-10">
+    <div class="max-w-6xl mx-auto px-4">
+      <div class="text-center mb-12">
+        <h2 class="section-title text-5xl sm:text-6xl md:text-7xl mb-3">The Legend</h2>
+        <p class="text-sky-400 font-extrabold tracking-widest text-sm uppercase">One cat. One stage. Infinite vibes.</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6 lg:gap-8 items-stretch">
+        <div class="cartoon-card p-6 sm:p-8 flex flex-col items-center text-center">
+          <div class="relative mb-6">
+            <img
+              src="logo.png"
+              alt="Keyboard Cat"
+              class="w-44 h-44 sm:w-52 sm:h-52 rounded-full object-cover logo-ring animate-float"
+            />
+            <span class="absolute -bottom-2 -right-2 text-4xl animate-wiggle">🎹</span>
+          </div>
+          <h3 class="font-display text-3xl sm:text-4xl text-white mb-2">Meet KEYCAT</h3>
+          <p class="text-sky-200/90 font-bold leading-relaxed">
+            The most legendary performing cat on the internet is back —
+            this time on Solana. Lights up. Keys down. Charts up.
+          </p>
+        </div>
+
+        <div class="cartoon-card p-6 sm:p-8 flex flex-col justify-center">
+          <div class="inline-flex self-start items-center gap-2 px-3 py-1 rounded-full bg-sky-500/15 border border-sky-400/30 text-sky-300 text-xs font-extrabold tracking-wider mb-4">
+            🎤 THE FACE BEHIND THE KEYS
+          </div>
+          <h3 class="font-display text-3xl sm:text-4xl text-cyan-300 mb-4">Larp Speaks</h3>
+          <blockquote class="relative text-sky-100 font-bold text-lg sm:text-xl leading-relaxed pl-5 border-l-4 border-sky-400">
+            “Larp is the face behind Keycat. In the KOL meta, we need one true believer backing a legendary meme.”
+          </blockquote>
+          <p class="mt-6 text-sky-300/90 font-bold">
+            No empty narratives. No rented hype. Just a true believer and the cat that taught the internet how to perform.
+          </p>
+          <div class="mt-6 flex flex-wrap gap-2">
+            <span class="px-3 py-1 rounded-full bg-sky-500/20 border border-sky-400/30 text-sky-200 text-xs font-extrabold">#KEYCAT</span>
+            <span class="px-3 py-1 rounded-full bg-sky-500/20 border border-sky-400/30 text-sky-200 text-xs font-extrabold">#Solana</span>
+            <span class="px-3 py-1 rounded-full bg-sky-500/20 border border-sky-400/30 text-sky-200 text-xs font-extrabold">#MemeCoin</span>
+            <span class="px-3 py-1 rounded-full bg-sky-500/20 border border-sky-400/30 text-sky-200 text-xs font-extrabold">#Larp</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature pills -->
+      <div class="grid sm:grid-cols-3 gap-4 mt-8">
+        <div class="cartoon-card p-5 text-center">
+          <div class="text-3xl mb-2">🎭</div>
+          <div class="font-display text-2xl text-white mb-1">Stage Energy</div>
+          <p class="text-sky-300 text-sm font-bold">Cartoon concert vibes. Neon lights. Pure performance meme.</p>
+        </div>
+        <div class="cartoon-card p-5 text-center">
+          <div class="text-3xl mb-2">⚡</div>
+          <div class="font-display text-2xl text-white mb-1">Solana Speed</div>
+          <p class="text-sky-300 text-sm font-bold">Fast fills, low fees, high chaos — built for meme velocity.</p>
+        </div>
+        <div class="cartoon-card p-5 text-center">
+          <div class="text-3xl mb-2">💙</div>
+          <div class="font-display text-2xl text-white mb-1">True Believer</div>
+          <p class="text-sky-300 text-sm font-bold">Larp backs the legend. Community plays the keys.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW TO BUY -->
+  <section id="how-to-buy" class="relative py-16 sm:py-24 z-10">
+    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-sky-950/40 to-transparent pointer-events-none"></div>
+    <div class="max-w-6xl mx-auto px-4 relative">
+      <div class="text-center mb-12">
+        <h2 class="section-title text-5xl sm:text-6xl md:text-7xl mb-3">How to Buy</h2>
+        <p class="text-sky-400 font-extrabold tracking-widest text-sm uppercase">4 easy steps to join the band</p>
+      </div>
+
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <!-- Step 1 -->
+        <div class="cartoon-card p-6 flex flex-col h-full hover:-translate-y-1 transition-transform">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="step-badge">1</div>
+            <div class="text-3xl">👛</div>
+          </div>
+          <h3 class="font-display text-2xl text-white mb-2">Get a Wallet</h3>
+          <p class="text-sky-200/90 text-sm font-bold leading-relaxed flex-1">
+            Download <span class="text-cyan-300">Phantom</span> or <span class="text-cyan-300">Solflare</span>.
+            Create a Solana wallet and keep your seed phrase safe offline.
+          </p>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="cartoon-card p-6 flex flex-col h-full hover:-translate-y-1 transition-transform">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="step-badge">2</div>
+            <div class="text-3xl">◎</div>
+          </div>
+          <h3 class="font-display text-2xl text-white mb-2">Add SOL</h3>
+          <p class="text-sky-200/90 text-sm font-bold leading-relaxed flex-1">
+            Buy SOL on an exchange (Binance, Coinbase, etc.) and send it to your Solana wallet address.
+          </p>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="cartoon-card p-6 flex flex-col h-full hover:-translate-y-1 transition-transform">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="step-badge">3</div>
+            <div class="text-3xl">🔗</div>
+          </div>
+          <h3 class="font-display text-2xl text-white mb-2">Open the Swap</h3>
+          <p class="text-sky-200/90 text-sm font-bold leading-relaxed flex-1">
+            Hit <span class="text-cyan-300">Buy Now</span> or open pump.fun swap. Connect your wallet and paste the $KEYCAT CA if needed.
+          </p>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="cartoon-card p-6 flex flex-col h-full hover:-translate-y-1 transition-transform">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="step-badge">4</div>
+            <div class="text-3xl">🎹</div>
+          </div>
+          <h3 class="font-display text-2xl text-white mb-2">Swap for $KEYCAT</h3>
+          <p class="text-sky-200/90 text-sm font-bold leading-relaxed flex-1">
+            Swap SOL → $KEYCAT, confirm the transaction, and welcome to the stage. You’re in the band now.
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+        <a
+          href="https://swap.pump.fun/?input=So11111111111111111111111111111111111111112&output=TBA"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="cartoon-btn btn-buy px-8 py-3.5 text-2xl sm:text-3xl w-full sm:w-auto"
+        >
+          🎹 Buy $KEYCAT Now
+        </a>
+        <button
+          type="button"
+          id="copy-ca-2"
+          class="cartoon-btn btn-chart copy-btn px-8 py-3.5 text-2xl sm:text-3xl w-full sm:w-auto"
+        >
+          📋 Copy CA
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- TOKENOMICS strip -->
+  <section class="relative py-12 z-10">
+    <div class="max-w-6xl mx-auto px-4">
+      <div class="cartoon-card p-6 sm:p-8">
+        <div class="flex flex-col md:flex-row md:items-center gap-6">
+          <div class="md:w-1/3">
+            <h2 class="font-display text-4xl text-white mb-1">Tokenomics</h2>
+            <p class="text-sky-300 font-bold text-sm">Simple. Fair. Stage-ready.</p>
+          </div>
+          <div class="flex-1 grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <div class="text-center p-3 rounded-2xl bg-stage-950/50 border border-sky-500/20">
+              <div class="font-display text-3xl text-cyan-300">$KEYCAT</div>
+              <div class="text-xs font-extrabold text-sky-400 tracking-wider mt-1">TICKER</div>
+            </div>
+            <div class="text-center p-3 rounded-2xl bg-stage-950/50 border border-sky-500/20">
+              <div class="font-display text-3xl text-cyan-300">SOL</div>
+              <div class="text-xs font-extrabold text-sky-400 tracking-wider mt-1">CHAIN</div>
+            </div>
+            <div class="text-center p-3 rounded-2xl bg-stage-950/50 border border-sky-500/20 col-span-2 sm:col-span-1">
+              <div class="font-display text-3xl text-cyan-300">LP</div>
+              <div class="text-xs font-extrabold text-sky-400 tracking-wider mt-1">LOCKED / BURNED</div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-5">
+          <div class="flex justify-between text-xs font-extrabold text-sky-400 mb-2">
+            <span>COMMUNITY SUPPLY</span>
+            <span>100% VIBES</span>
+          </div>
+          <div class="h-3 rounded-full bg-stage-950/80 border border-sky-500/20 overflow-hidden">
+            <div class="tokenomics-bar w-full h-full"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHART / DEXSCREENER -->
+  <section id="chart" class="relative py-16 sm:py-24 z-10">
+    <div class="max-w-6xl mx-auto px-4">
+      <div class="text-center mb-10">
+        <h2 class="section-title text-5xl sm:text-6xl md:text-7xl mb-3">Live Chart</h2>
+        <p class="text-sky-400 font-extrabold tracking-widest text-sm uppercase">Watch the performance on DexScreener</p>
+      </div>
+
+      <div class="dex-frame mb-6">
+        <iframe
+          id="dex-embed"
+          title="DexScreener KEYCAT Chart"
+          class="w-full h-[420px] sm:h-[520px] md:h-[600px] bg-stage-900"
+          src="https://dexscreener.com/solana/TBA?embed=1&theme=dark&trades=0&info=0"
+          allow="clipboard-write"
+          loading="lazy"
+        ></iframe>
+      </div>
+
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+        <a
+          href="https://dexscreener.com/solana/TBA"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="cartoon-btn btn-chart px-7 py-3 text-xl sm:text-2xl w-full sm:w-auto"
+        >
+          📊 Open Full Chart
+        </a>
+        <a
+          href="https://swap.pump.fun/?input=So11111111111111111111111111111111111111112&output=TBA"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="cartoon-btn btn-buy px-7 py-3 text-xl sm:text-2xl w-full sm:w-auto"
+        >
+          🎹 Buy on Pump
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMMUNITY -->
+  <section id="community" class="relative py-16 sm:py-20 z-10">
+    <div class="max-w-4xl mx-auto px-4">
+      <div class="cartoon-card p-8 sm:p-12 text-center overflow-hidden relative">
+        <div class="absolute -top-10 -left-10 text-8xl opacity-10 pointer-events-none">🎵</div>
+        <div class="absolute -bottom-10 -right-10 text-8xl opacity-10 pointer-events-none">🎹</div>
+
+        <h2 class="section-title text-5xl sm:text-6xl mb-4">Join the Band</h2>
+        <p class="text-sky-200 font-bold text-lg max-w-xl mx-auto mb-8">
+          Follow the tour. Share the stage. Pump with the true believers.
+        </p>
+
+        <div class="flex items-center justify-center gap-5 mb-8">
+          <a href="https://t.me/KEYCATpump" target="_blank" rel="noopener noreferrer" class="btn-social tg-bg w-16 h-16" title="Telegram">
+            <img src="tg.png" alt="Telegram" class="w-full h-full object-cover" />
+          </a>
+          <a href="https://x.com/KEYCATpump" target="_blank" rel="noopener noreferrer" class="btn-social x-bg w-16 h-16" title="X / Twitter">
+            <img src="x.png" alt="X / Twitter" class="x-icon" />
+          </a>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <a
+            href="https://t.me/KEYCATpump"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="cartoon-btn btn-buy px-6 py-3 text-xl w-full sm:w-auto"
+          >
+            ✈️ Telegram
+          </a>
+          <a
+            href="https://x.com/KEYCATpump"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="cartoon-btn btn-chart px-6 py-3 text-xl w-full sm:w-auto"
+          >
+            𝕏 Twitter
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="relative z-10 border-t-2 border-sky-500/20 py-10 mt-4">
+    <div class="max-w-6xl mx-auto px-4 flex flex-col items-center gap-4 text-center">
+      <div class="flex items-center gap-3">
+        <img src="logo.png" alt="KEYCAT" class="w-12 h-12 rounded-full object-cover logo-ring" />
+        <div class="text-left">
+          <div class="font-display text-2xl text-white">Keyboard Cat</div>
+          <div class="text-xs font-extrabold text-sky-400 tracking-widest">$KEYCAT · SOLANA</div>
+        </div>
+      </div>
+      <p class="text-sky-400/80 text-sm font-bold max-w-md">
+        $KEYCAT is a meme coin for entertainment. Not financial advice. DYOR. NFA.
+      </p>
+      <p class="text-sky-500 text-xs font-bold">
+        © <span id="year"></span> Keyboard Cat · Hit the keys 🎹
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    // Year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Music symbol rain — rises from bottom to top
+    (function initMusicRain() {
+      const layer = document.getElementById('music-rain');
+      if (!layer) return;
+
+      const symbols = ['🎵', '🎶', '🎼', '🎹', '🎤', '🎷', '🎸', '🥁', '🎺', '🎧', '♪', '♫', '♬', '♩', '♭', '♮'];
+      const count = window.matchMedia('(max-width: 640px)').matches ? 28 : 48;
+
+      for (let i = 0; i < count; i++) {
+        const drop = document.createElement('span');
+        drop.className = 'music-drop';
+        drop.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+
+        const left = Math.random() * 100;
+        const duration = 7 + Math.random() * 11; // 7–18s
+        const delay = Math.random() * -18; // stagger / already mid-flight
+        const size = 0.75 + Math.random() * 1.35;
+        const opacity = 0.25 + Math.random() * 0.45;
+        const drift = (Math.random() - 0.5) * 80; // slight side drift
+        const rot = (Math.random() > 0.5 ? 1 : -1) * (180 + Math.random() * 360);
+
+        drop.style.left = left + 'vw';
+        drop.style.fontSize = size + 'rem';
+        drop.style.animationDuration = duration + 's';
+        drop.style.animationDelay = delay + 's';
+        drop.style.setProperty('--o', String(opacity));
+        drop.style.setProperty('--s', String(0.85 + Math.random() * 0.5));
+        drop.style.setProperty('--drift', drift + 'px');
+        drop.style.setProperty('--rot', rot + 'deg');
+
+        layer.appendChild(drop);
+      }
+    })();
+
+    // Contract address (update when live)
+    const CA = 'TBA';
+
+    function copyCA() {
+      const text = CA;
+      const showToast = () => {
+        const toast = document.getElementById('toast');
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 1800);
+      };
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(showToast).catch(() => {
+          fallbackCopy(text);
+          showToast();
+        });
+      } else {
+        fallbackCopy(text);
+        showToast();
+      }
+    }
+
+    function fallbackCopy(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(ta);
+    }
+
+    document.getElementById('copy-ca').addEventListener('click', copyCA);
+    document.getElementById('copy-ca-2').addEventListener('click', copyCA);
+
+    // Paw trail following cursor (3 footprints)
+    const paws = [
+      document.getElementById('paw1'),
+      document.getElementById('paw2'),
+      document.getElementById('paw3'),
+    ];
+
+    const positions = [
+      { x: -100, y: -100 },
+      { x: -100, y: -100 },
+      { x: -100, y: -100 },
+    ];
+
+    let mouseX = -100;
+    let mouseY = -100;
+    let frame = 0;
+
+    document.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    });
+
+    // Staggered spring-follow for 3 paws
+    const lags = [0.18, 0.11, 0.07];
+    const offsets = [
+      { x: -8, y: 18 },
+      { x: 10, y: 34 },
+      { x: -4, y: 50 },
+    ];
+
+    // Target chain: paw0 follows mouse, paw1 follows paw0, paw2 follows paw1
+    const targets = [
+      { x: mouseX, y: mouseY },
+      { x: mouseX, y: mouseY },
+      { x: mouseX, y: mouseY },
+    ];
+
+    function animatePaws() {
+      frame++;
+
+      targets[0].x = mouseX + offsets[0].x;
+      targets[0].y = mouseY + offsets[0].y;
+
+      for (let i = 0; i < 3; i++) {
+        if (i > 0) {
+          targets[i].x = positions[i - 1].x + offsets[i].x * 0.4;
+          targets[i].y = positions[i - 1].y + 16;
+        }
+
+        positions[i].x += (targets[i].x - positions[i].x) * lags[i] * 2.2;
+        positions[i].y += (targets[i].y - positions[i].y) * lags[i] * 2.2;
+
+        const rot = Math.sin((frame + i * 12) * 0.08) * 18;
+        const opacity = 0.95 - i * 0.22;
+        const scale = 1 - i * 0.12;
+
+        paws[i].style.transform =
+          `translate(${positions[i].x}px, ${positions[i].y}px) rotate(${rot}deg) scale(${scale})`;
+        paws[i].style.opacity = String(opacity);
+      }
+
+      requestAnimationFrame(animatePaws);
+    }
+
+    animatePaws();
+
+    // Hide paws when leaving window
+    document.addEventListener('mouseleave', () => {
+      paws.forEach((p) => { p.style.opacity = '0'; });
+    });
+  </script>
+</body>
+</html>
